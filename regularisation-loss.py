@@ -59,16 +59,11 @@ for i in range(len(y)) :
 for i in range(len(y)) :
 	logistic.append(logisticLoss(y[i], f[i]))
 
-print("<-------> Aufgabe 5.1 Loss for Classification <------>")
-print("\n0-1-Loss")
-print(binary)
-print("\nHinge Loss")
-print(hinge)
-print("\nQuadratic Hinge Loss")
-print(quadraticHinge)
-print("\nLogistic Loss")
-print(logistic)
-print("\n\n")
+print '<-------> Aufgabe 5.1 Loss for Classification <------>'
+print '0-1-Loss : {}'.format(binary)
+print 'Hinge Loss : {}'.format(hinge)
+print 'Quadratic Hinge Loss : {}'.format(quadraticHinge)
+print 'Logistic Loss : {}'.format(logistic)
 
 ###########################################################
 # Aufgabe 5.2: Loss for Regression
@@ -95,6 +90,7 @@ f = []
 absolute = []
 squared = []
 insensitive = []
+epsilon = 1
 
 #Regressionsgerade berechnen
 for entry in x:
@@ -110,18 +106,14 @@ for i in range(len(y)) :
 
 #Epsilon-insensitive Loss
 for i in range(len(y)) :
-	insensitive.append(epsilonInsensitiveLoss(y[i], f[i],1))
+	insensitive.append(epsilonInsensitiveLoss(y[i], f[i],epsilon))
 
 
 
-print("<-------> Aufgabe 5.2 Loss for Regression <------>")
-print("\nAbsolute Loss")
-print(absolute)
-print("\nSquared Loss")
-print(squared)
-print("\nEpsilon-insensitive Loss")
-print(insensitive)
-print("\n\n")
+print "<-------> Aufgabe 5.2 Loss for Regression <------>"
+print "Absolute Loss : {}".format(absolute)
+print "Squared Loss : {}".format(squared)
+print "Epsilon-insensitive Loss (epsilon = {}): {}".format(epsilon, insensitive)
 
 ###########################################################
 
