@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 #Aufgabe 7.2: Hyperplane Classifier
 
 def pnf(x,a,w) :
-    return dot(x,(w/norm(w)))-dot(a,(w/norm(w)));
+    return float(dot(x,(w/norm(w)))-dot(a,(w/norm(w))));
 
 def classifier(input, o, r) :
 	return dot(input, o) - r
