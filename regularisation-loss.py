@@ -38,7 +38,6 @@ hinge = []
 quadraticHinge = []
 logistic = []
 
-
 #classifier berechnen
 for entry in x :
 	f.append(classifier(entry, omega, rho))
@@ -60,6 +59,8 @@ for i in range(len(y)) :
 	logistic.append(logisticLoss(y[i], f[i]))
 
 print '<-------> Aufgabe 5.1 Loss for Classification <------>'
+print 'prediction : {}'.format(y)
+print 'classifier : {}'.format(f)
 print '0-1-Loss : {}'.format(binary)
 print 'Hinge Loss : {}'.format(hinge)
 print 'Quadratic Hinge Loss : {}'.format(quadraticHinge)
@@ -78,10 +79,11 @@ def squaredLoss(y,z):
 	return pow(z-y, 2)
 
 def epsilonInsensitiveLoss(y,z, epsilon) :
-	if fabs(z-y) >= epsilon :
-		return 0
-	else :
-		return fabs(z-y)-epsilon
+	return fabs(z-y)
+#	if fabs(z-y) <= epsilon :
+#		return 0
+#	else :
+#		return fabs(z-y)-epsilon
 		
 
 x = [1,2,5,2,0]
@@ -117,3 +119,5 @@ print "Epsilon-insensitive Loss (epsilon = {}): {}".format(epsilon, insensitive)
 
 ###########################################################
 
+# Aufgabe 5.3
+# 
