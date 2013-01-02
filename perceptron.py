@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#Learning project Algorithmus
+# Perceptron Algorithm: Implementation of Gradient Descent
 ######################################################################
 
 from numpy import dot
@@ -24,7 +24,7 @@ def categories() :
     categoryList.append('Sinne')
     return categoryList
 
-#Count the given words in a given text
+# Count the given words in a given text
 def scrape(inputText, categories) :
     features = []
     for entry in categories :
@@ -44,7 +44,7 @@ def scrape(inputText, categories) :
         features.append(count)
     return features;
 
-#Given perceptron algorithm
+# Given perceptron algorithm
 def perceptron(x_in,y_in,rho_init,omega_init, alpha) :
     rho = rho_init
     omega = omega_init
