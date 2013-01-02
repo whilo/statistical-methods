@@ -20,10 +20,10 @@ def hingeLoss(y,z) :
 		return 1-y*z
 
 def quadraticHingeLoss(y,z) :
-	if pow((y*z),2) >= 1:
+	if float(pow((y*z),2)) >= 1:
 		return 0
 	else:
-		return pow((1-y*z),2)
+		return float(pow((1-y*z),2))
 
 def logisticLoss(y,z) :
 	return log(1+exp(-y*z), 2)
