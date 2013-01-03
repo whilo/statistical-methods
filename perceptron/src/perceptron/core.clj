@@ -3,8 +3,7 @@
 
 (use 'clojure.java.io
      'clojure.string
-     'clojure.tools.trace
-     'clojure.debug)
+     'clojure.tools.trace)
 
 ; math helpers
 (defn dot
@@ -81,7 +80,7 @@
 
 ; calculate
 ; as script with tracing
-(dotrace [iter perceptron] (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
+;(dotrace [iter perceptron] (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
 
 ; as java entry point (without tracing)
 (defn -main [& args]
