@@ -40,36 +40,35 @@
 
 (defn extract
   [sample]
-  {
-   :Verband (get sample "Verband" 0)
-   :Struktur (get sample "Struktur" 0)
-   :Lehre (get sample "Lehre" 0)
-   :Körper (get sample "Körper" 0)
-   :Teilgebiet (get sample "Teilgebiet" 0)
-   :Person_en (+ (get sample "Person" 0) (get sample "Personen" 0))
-   :Krankheit (get sample "Krankheit" 0)
-   :Medizin (get sample "Medizin" 0)
-   :Sinne (get sample "Sinne" 0)
-   })
+  [
+   (get sample "Verband"  0)
+   (get sample "Struktur" 0)
+   (get sample "Lehre"  0)
+   (get sample "Körper"  0)
+   (get sample "Teilgebiet" 0)
+   (+ (get sample "Person" 0) (get sample "Personen" 0))
+   (get sample "Krankheit" 0)
+   (get sample "Medizin" 0)
+   (get sample "Sinne" 0)
+   ])
 
 ; hardcode ranking
 (def samples (interleave (map extract freqs) [1 -1 -1 1 1 1 1 -1 1 -1]))
 
 ; write word count to file
-
 (defn format [a]
   (join \newline (map #(join \tab %) a)))
 
-
 ;(spit "/home/void/alphabetically" (format freqs) )
 
+; perceptron algorithm
 (defn perceptron [train w_init rho_init alpha]
-  (println "new iteration with w:" (pr-str w_init) "rho:" rho_init)
+  (println "new iteration with w: " (pr-str w_init) " rho: " rho_init)
   (defn iter
-    "Iteration over all samples. Returns map with weights rho errors."
     [s w rho errors]
-    (println "w: " (pr-str w) "rho: " rho "errors: " errors)
-    (let [x (vals (first s))  y (first (rest s)) r (rest (rest s))]
+    (println "w: " (pr-str w) " rho: " rho " errors: " errors)
+    (let [x (first s)  y (first (rest s)) r (rest (rest s))]
+      (println (pr-str x))
       (if (not (empty? s))
         (let [err (<= (* y (+ (dot x w) rho)) 0)]
               (iter r

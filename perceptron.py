@@ -45,26 +45,26 @@ def scrape(inputText, categories) :
     return features;
 
 # Given perceptron algorithm
-def perceptron(x_in,y_in,rho_init,omega_init, alpha) :
+def perceptron(x_in,y_in,rho_init,w_init, alpha) :
     rho = rho_init
-    omega = omega_init
+    w = w_init
     x = x_in
     y = y_in
-    errors = False
+    errors = True
     loopRound = 0
-    while not errors :
-        print 'Iteration:', loopRound
-        loopRound += 1
-        errors = True
+    while errors :
+        print 'new iteration with w: {} rho: {}'.format(w,rho)
+        errors = False
         for i in range(len(y)) :
-            if (y[i]*(dot(omega,x[i]) + rho)) <= 0 :
-                omega = map(sum, zip(omega,map(lambda z: alpha*y[i]*z, x[i])))
+            print 'w = {}, rho = {}'.format(w, rho)
+#            print 'x = {}, y = {}'.format(x[i], y[i])
+            if (y[i]*(dot(w,x[i]) + rho)) <= 0 :
+                w = map(sum, zip(w,map(lambda z: alpha*y[i]*z, x[i])))
                 rho = rho + alpha*y[i]
-                errors = False
-                print 'omega = {}, rho = {}'.format(omega, rho)
+                errors = True
 
 # Initializing the stuff
-rawData = readFile('/home/konny/uni/sm/blaetter/corpus.txt')
+rawData = readFile('/home/void/corpus.txt')
 categories = categories()
 omega_init = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
 rho_init = 0.0
