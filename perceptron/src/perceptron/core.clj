@@ -1,4 +1,5 @@
-(ns perceptron.core)
+(ns perceptron.core
+  (:gen-class))
 
 (use 'clojure.java.io)
 (use 'clojure.string)
@@ -7,34 +8,29 @@
 
 (defn dot
   [a b]
-  (reduce + (map * a b))
-  )
+  (reduce + (map * a b)))
 
 (defn scalarp
   [s v]
-  (map #(* s %) v)
-  )
+  (map #(* s %) v))
 
 (defn vadd
   [v1 v2]
-  (map + v1 v2)
-  )
+  (map + v1 v2))
 
 ; word count
-
 (defn distribution [items]
   (persistent!
    (reduce #(assoc! %1 %2 (inc (%1 %2 0))) (transient {}) items)))
 
 ; file io
-
 (def texts
   (filter #(not (empty? %))
-          (with-open [r (reader "/home/void/corpus.txt")]
-            (doall (line-seq r) ))))
+    (with-open [r (reader "/home/void/corpus.txt")]
+      (doall (line-seq r) ))))
 
 (defn process-training-data [samples]
-  (pmap #(distribution (re-seq #"[\wäöüß]+" %)) samples))
+  (map #(distribution (re-seq #"[\wäöüß]+" %)) samples))
 
 (def freqs (process-training-data texts))
 
@@ -56,10 +52,10 @@
 (def samples (interleave (map extract freqs) [1 -1 -1 1 1 1 1 -1 1 -1]))
 
 ; write word count to file
-(defn format [a]
+(defn tab-format [a]
   (join \newline (map #(join \tab %) a)))
 
-;(spit "/home/void/alphabetically" (format freqs) )
+;(spit "/home/void/alphabetically" (tab-format freqs) )
 
 ; perceptron algorithm
 (defn perceptron [train w_init rho_init alpha]
@@ -67,8 +63,8 @@
   (defn iter
     [s w rho errors]
     (println "w: " (pr-str w) " rho: " rho " errors: " errors)
-    (let [x (first s)  y (first (rest s)) r (rest (rest s))]
-      (println (pr-str x))
+    (let [x (first s) y (first (rest s)) r (rest (rest s))]
+;      (println (pr-str x))
       (if (not (empty? s))
         (let [err (<= (* y (+ (dot x w) rho)) 0)]
               (iter r
@@ -83,5 +79,6 @@
       res)))
 
 ; calculate
-(defn -main []
+;(pr-str (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
+(defn -main [& args]
   (println (pr-str (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))))
