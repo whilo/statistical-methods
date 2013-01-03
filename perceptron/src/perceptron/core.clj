@@ -29,12 +29,12 @@
     (with-open [r (reader "/home/void/corpus.txt")]
       (doall (line-seq r) ))))
 
-(defn process-training-data [samples]
+(defn wordify [samples]
   (map #(distribution (re-seq #"[\wäöüß]+" %)) samples))
 
-(def freqs (process-training-data texts))
+(def freqs (wordify texts))
 
-(defn extract
+(defn feat-extract
   [sample]
   [
    (get sample "Verband"  0)
@@ -48,8 +48,24 @@
    (get sample "Sinne" 0)
    ])
 
+(defn feat-map
+  [w_list]
+  (let [w (into [] w_list)]
+  {
+   :Verband (w 0)
+   :Struktur (w 1)
+   :Lehre (w 2)
+   :Körper (w 3)
+   :Teilgebiet (w 4)
+   :Person_en (w 5)
+   :Krankheit (w 6)
+   :Medizin (w 7)
+   :Sinne (w 8)
+   }
+  ))
+
 ; hardcode ranking
-(def samples (interleave (map extract freqs) [1 -1 -1 1 1 1 1 -1 1 -1]))
+(def samples (interleave (map feat-extract freqs) [1 -1 -1 1 1 1 1 -1 1 -1]))
 
 ; write word count to file
 (defn tab-format [a]
@@ -59,10 +75,10 @@
 
 ; perceptron algorithm
 (defn ^:dynamic perceptron [train w_init rho_init alpha]
-  (println "new iteration with w: " (pr-str w_init) " rho: " rho_init)
+  (println "new iteration with w: " (feat-map w_init) " rho: " rho_init)
   (defn ^:dynamic iter
     [s w rho errors]
-    (println "w: " (pr-str w) " rho: " rho " errors: " errors)
+    (println "w: " (feat-map w) " rho: " rho " errors: " errors)
     (let [x (first s) y (first (rest s)) r (rest (rest s))]
 ;      (println (pr-str x))
       (if (not (empty? s))
@@ -80,7 +96,7 @@
 
 ; calculate
 ; as script with tracing
-;(dotrace [iter perceptron] (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
+;(dotrace [iter perceptron] (feat-map (:w (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))))
 
 ; as java entry point (without tracing)
 (defn -main [& args]
