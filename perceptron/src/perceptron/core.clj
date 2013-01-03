@@ -29,10 +29,10 @@
     (with-open [r (reader "/home/void/corpus.txt")]
       (doall (line-seq r) ))))
 
-(defn wordify [samples]
+(defn word-count  [samples]
   (map #(distribution (re-seq #"[\wäöüß]+" %)) samples))
 
-(def freqs (wordify texts))
+(def freqs (word-count texts))
 
 (defn feat-extract
   [sample]
