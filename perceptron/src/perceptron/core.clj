@@ -1,11 +1,12 @@
 (ns perceptron.core
   (:gen-class))
 
-(use 'clojure.java.io)
-(use 'clojure.string)
+(use 'clojure.java.io
+     'clojure.string
+     'clojure.tools.trace
+     'clojure.debug)
 
 ; math helpers
-
 (defn dot
   [a b]
   (reduce + (map * a b)))
@@ -58,9 +59,9 @@
 ;(spit "/home/void/alphabetically" (tab-format freqs) )
 
 ; perceptron algorithm
-(defn perceptron [train w_init rho_init alpha]
+(defn ^:dynamic perceptron [train w_init rho_init alpha]
   (println "new iteration with w: " (pr-str w_init) " rho: " rho_init)
-  (defn iter
+  (defn ^:dynamic iter
     [s w rho errors]
     (println "w: " (pr-str w) " rho: " rho " errors: " errors)
     (let [x (first s) y (first (rest s)) r (rest (rest s))]
@@ -79,6 +80,9 @@
       res)))
 
 ; calculate
-;(pr-str (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
+; as script with tracing
+(dotrace [iter perceptron] (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))
+
+; as java entry point (without tracing)
 (defn -main [& args]
   (println (pr-str (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))))
