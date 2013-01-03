@@ -92,7 +92,7 @@
   (let [res (iter train w_init rho_init 0)]
     (if (> (res :errors) 0)
       (perceptron train (res :w) (res :rho) alpha)
-      res)))
+      {:w (feat-map (res :w)) :rho (res :rho)} )))
 
 ; calculate
 ; as script with tracing
@@ -100,4 +100,4 @@
 
 ; as java entry point (without tracing)
 (defn -main [& args]
-  (println (pr-str (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5))))
+  (println (perceptron samples [1 1 1 1 1 1 1 1 1] 0 0.5)))
