@@ -76,18 +76,42 @@
 
 
 ; machine learning
-(defn ^:dynamic penalty?
-  "Returns true if the sample s misses the in-class
-  predicate with weights w and distance rho."
+(defn ^:dynamic hinge-loss?
+  "Returns true if the sample x misses the is-in-class
+  predicate with weights w and threshold rho."
   [w rho is-in-class x]
     (let [y (if is-in-class 1 -1)]
       (<= (* y (+ (dot x w) rho)) 0)))
 
 
+(defmacro defun
+  [sym args & body]
+  (let [
+        [pargs [_ & kargs]] (split-with (fn [x] (not (= x ':key))) args)
+        gkeys (gensym "gkeys__")
+        letk (fn [k]
+               (let [[nm val] (if (vector? k) k [k])
+                     kname (keyword (name nm))]
+                 `(~nm (or (~gkeys ~kname) ~val))))]
+    `(defn ~sym [~@pargs & k#]
+       (let [~gkeys (apply hash-map k#)
+             ~@(apply concat (map letk kargs))]
+         ~@body))))
+
+(defun foo [:key [a 0] b c [d 5]] [a b c d])
+
+(defun foo-add
+  [x y] (+ x y))
+
+(foo 1 2 :c 3 :d 4)
+
+
 (defn perceptron
   "Trains the perceptron on the train sample set
-  with weights w_init, distance rho_init, and
-  learning rate alpha. Returns state as a map."
+  trn-smpls with boolean classifier clfr,
+  penalty function pen with weights w_init, threshold
+  rho_init, and learning rate alpha. Returns state
+  as a map."
   [trn-smpls clfr pen w_init rho_init alpha]
   (defn ^:dynamic correct
     "Returns corrected intermediate result ir to
@@ -121,28 +145,41 @@
 
 
 (defn missclassified
+  "Returns all missclassified samples by model mdl
+   training set trn, predicate classifier clfr and
+   a predicate function pn for the penalty."
   [mdl trn clfr pn]
-  (let [p (partial pn (mdl :w) (mdl :rho) clfr)]
+  (let [p (partial pn (mdl :w) (mdl :rho))]
     ;; false classified if penalty and in class (and vice versa)
-    (filter #(if (= (p (%1 :x)) (clfr (%1 :y))) %1) trn)))
+    (filter #(if (p (clfr (%1 :y)) (%1 :x)) %1) trn)))
 
 
 (defn classify
-  [model train]
-  (let [w (model :w)
-        rho (model :rho)]
-    (map (fn [a] {:c  (+ (dot w (:x a)) rho) :y (:y a)}) train)))
+  "Classify samples smpl with model mdl.
+   Returns a list of maps containing the
+   classification :c and the original entry
+   of :y."
+  [mdl smpls]
+  (let [w (mdl :w)
+        rho (mdl :rho)]
+    (map (fn [a] {:c (+ (dot w (:x a)) rho) :y (:y a)}) smpls)))
 
 
 ; data
+(def base-dir "/home/void/Dokumente/Studium/Computerlinguistik/Statistische Methoden/Übungen/iris_dataset")
+
+(def train-data {
+           0 (map parse-svmlight (ne-lines (str base-dir "/iris.setosa-v-rest")))
+           1 (map parse-svmlight (ne-lines (str base-dir "/iris.versicolor-v-rest")))
+           2 (map parse-svmlight (ne-lines (str base-dir "/iris.virginica-v-rest")))
+           })
+
+(def test-data (map parse-svmlight (ne-lines (str base-dir "/test.data"))))
+
+
 (def texts (ne-lines "/home/void/corpus.txt"))
 
-
-(def test-data (map parse-svmlight (ne-lines "/home/void/test.data")))
-
-
 (def freqs (word-count texts))
-
 
 (def samples
   (into ()
@@ -150,18 +187,21 @@
              freqs
              [1 -1 -1 1 1 1 1 -1 1 -1])))
 
-
 (def w_start (zipmap (keys (feat-extract {})) (repeat 1)))
-
 
 (def w_new {1 1, 2 1, 3 1, 4 1})
 
+#_(persistent! (reduce
+              #(let [rslt (perceptron (train-data %2) (partial == %2) hinge-loss? w_new 0 0.5)]
+                 (if (= (:errs rslt) 0) (assoc! %1 %2 rslt)))
+              (transient {})
+              (keys train-data)))
 
-#_(let [clfr (partial == 2.0) data test-data pen penalty?]
-  (count (missclassified (perceptron data clfr pen w_new 0 0.5)
-                         data
-                         clfr
-                         pen)))
+#_(/ (count (missclassified (perceptron (train-data 2) (partial == 1) hinge-loss? w_new 0 0.5)
+                       test-data
+                       (partial == 1)
+                       hinge-loss?))
+   (count test-data))
 
 ;(let [clfr (partial == 1.0)]
 ; (dotrace [penalty? dot]
@@ -169,7 +209,7 @@
 
 ; as java entry point (without tracing)
 (defn -main [& args]
-  (println (perceptron test-data (partial == 0.0) penalty? w_new 0 0.5)))
+  (println (perceptron test-data (partial == 0.0) hinge-loss? w_new 0 0.5)))
 
 ;(def json-article (read-str (slurp "https://de.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&&titles=Impfung")))
 
