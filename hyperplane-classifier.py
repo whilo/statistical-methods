@@ -41,7 +41,8 @@ print "d) Zeichnung"
 plt.plot(map(lambda x: x[0], minus+plus), map(lambda x: x[1], minus+plus), 'ro' )
 t = arange(-2.,10.,0.2)
 plt.plot(t, -3/4*t + 25/4)
-plt.axis([-2,10,0,10])
+plt.plot(t, 4/3*t)
+plt.axis([-2,10,-2,10])
 plt.show()
 
 print "e) Nehme falsch klassifizierten Punkt x_6 [[4,2],-1]"
