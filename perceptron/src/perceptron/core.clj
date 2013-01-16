@@ -64,13 +64,13 @@
                          :count (inc c)))))))
 
 
-(defn missclassified
+(defn not-missclassified
   "Returns all missclassified samples by model mdl
    training set trn, predicate classifier clfr and
    a predicate function pn for the penalty."
   [mdl trn clfr pn]
   (let [p (partial pn (mdl :w) (mdl :rho))]
-    (filter #(if (p (clfr (%1 :y)) (%1 :x)) %1) trn)))
+    (filter #(if-not (p (clfr (%1 :y)) (%1 :x)) %1) trn)))
 
 
 (defn classify
@@ -106,7 +106,7 @@
                 (println (perceptron smpls (partial == cls) hinge-loss? {} 0 0.5))
                 (:t options)
                 (let [w (read-string (:t options))]
-                  (println (/ (count (missclassified w smpls (partial == cls) hinge-loss?))
+                  (println (/ (count (not-missclassified w smpls (partial == cls) hinge-loss?))
                               (count smpls))))
                 :else (println banner))
           (println banner))
