@@ -1,5 +1,6 @@
 (ns perceptron.iris
-  (:use [perceptron.io]))
+  (:use [perceptron.io]
+        [perceptron.sparse]))
 
 ;; sample set in classes 0, 1, 2 and testing data
 (def iris-dir "/home/void/Dokumente/Studium/Computerlinguistik/Statistische Methoden/Übungen/iris_dataset")

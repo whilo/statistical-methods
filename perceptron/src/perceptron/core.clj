@@ -4,6 +4,7 @@
         [clojure.tools.trace :only [dotrace]]
         [clojure.tools.cli :only [cli]]
         [perceptron.sparse]
+        [perceptron.iris]
         [perceptron.io])
   (:import [java.io BufferedReader]))
 
@@ -64,6 +65,40 @@
                          :count (inc c)))))))
 
 
+(defn dual-perceptron
+  "Taking a kernel and samples and giving back
+   a model."
+  [krnl smpls]
+    (defn ^:dynamic kernel-correct
+      [mdl s]
+      (let [w (:w mdl)
+            sum (* (:y s)
+                 (reduce +
+                        (map #(* (w %) ; alpha
+                                 (:y %)
+                                 (krnl (:x %) (:x s)))
+                             (keys w))))
+            err (<= sum 0)
+            alpha (or (w s) 0)
+            new-alpha (if err (inc alpha) alpha)
+            new-w (assoc (:w mdl) s new-alpha)]
+        (assoc mdl :errs (or (:errs mdl) err)
+                   :w new-w)))
+
+    (loop [mdl {:w {} :errs true :count 0}]
+      (if (and (:errs mdl) (< (:count mdl) 100))
+        (recur
+         (reduce kernel-correct
+                 (assoc mdl :errs false :count (inc (mdl :count)))
+                 smpls))
+        mdl)))
+
+(def dual-rslt
+  (dual-perceptron dot (iris-train 2)))
+
+(filter #(> ((dual-rslt :w) %) 0) (keys (dual-rslt :w)))
+
+
 (defn not-missclassified
   "Returns all missclassified samples by model mdl
    training set trn, predicate classifier clfr and
@@ -95,20 +130,17 @@
 (defn -main [& args]
   (let [[options args banner] (cli args
                                    ["--class" "-c" "REQUIRED. Classification (y value) for positive samples." :parse-fn #(Integer. %)]
-                                   ["--filename" "-f" "REQUIRED. File to get samples from."]
                                    ["--learn" "-l" "Learn model from std input." :flag true]
-                                   ["--test" "-t" "Test model from std input (format of the modell has to be the same as one returned from learn.) Returns recall."]
+                                   ["--test" "-t" "Test model (format of the modell has to be the same as one returned from learn.) Returns precision." :parse-fn read-string]
                                    ["--help" "-h" "Print this help message." :flag true])]
     (if-let [cls (:c options)]
-      (if-let [fn (:f options)]
-        (if-let [smpls (map parse-svmlight (ne-lines fn))]
-          (cond (:l options)
-                (println (perceptron smpls (partial == cls) hinge-loss? {} 0 0.5))
-                (:t options)
-                (let [w (read-string (:t options))]
-                  (println (/ (count (not-missclassified w smpls (partial == cls) hinge-loss?))
-                              (count smpls))))
-                :else (println banner))
-          (println banner))
+      (if-let [smpls (map parse-svmlight (-> *in* BufferedReader. line-seq))]
+        (cond (:l options)
+              (println (perceptron smpls (partial == cls) hinge-loss? {} 0 0.5))
+              (:t options)
+              (let [w (:t options)]
+                (println (/ (count (not-missclassified w smpls (partial == cls) hinge-loss?))
+                            (count smpls))))
+              :else (println banner))
         (println banner))
       (println banner))))
